@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HomeCloudHub</title>
+<link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+<h1>Welcome to HomeCloudHub!</h1>
+<div class="file-explorer">
+<input type="text" id="searchInput" placeholder="Search for files..." />
+<button id="search" onclick="searchFiles()">Search</button>
+<form
+action="{{ url_for('upload_file') }}"
+method="post"
+enctype="multipart/form-data"
+>
+<input
+type="file"
+id="fileUpload"
+name="files"
+multiple
+style="display: none"
+onchange="updateName()"
+/>
+<label for="fileUpload" class="upload-box">Choose files</label>
+<input
+type="text"
+id="fileName"
+placeholder="No files chosen"
+readonly
+/>
+<button type="submit" class="upload-btn">Upload</button>
+</form>
+5
+<form id="fileActionsForm" action="#" method="post">
+<ul id="fileList">
+{% for file in files %}
+<li class="custom-list">
+<input type="checkbox" name="selectedFiles" value="{{ file }}" /> {{
+file }}
+<a
+href="{{ url_for('get_file', filename=file) }}"
+class="download-link"
+>Download</a
+>
+</li>
+{% endfor %}
+</ul>
+</form>
+<div class="action-btns">
+<button
+type="button"
+id="downloadSelectedBtn"
+onclick="downloadSelected()"
+>
+Download Selected
+</button>
+<button
+type="submit"
+id="deleteSelectedBtn"
+onclick="return confirmDelete()"
+>
+Delete Selected
+</button>
+</div>
+</div>
+<script>
+function searchFiles() {
+var searchInput = document.getElementById("searchInput");
+window.location.href = "/?search=" + encodeURIComponent(searchInput.value);
+}
+function downloadSelected() {
+var selectedFiles = document.querySelectorAll('input[name="selectedFiles"]:checked');
+6
+selectedFiles.forEach(function(file) {
+window.open('{{ url_for('get_file', filename='')}}' + file.value);
+});
+}
+function confirmDelete() {
+var selectedFiles = document.querySelectorAll('input[name="selectedFiles"]:checked');
+var fileNames = Array.from(selectedFiles).map(function(file) {
+return file.value;
+});
+if (fileNames.length > 0) {
+return confirm("Are you sure you want to delete these files: " + fileNames.join(", ") + "?");
+} else {
+alert("Please select files to delete.");
+return false;
+}
+}
+function updateName() {
+var input = document.getElementById("fileUpload");
+var fileNameDisplay = document.getElementById("fileName");
+var fileCount = input.files.length;
+if (fileCount === 1) {
+fileNameDisplay.value = input.files[0].name;
+} else if (fileCount > 1) {
+fileNameDisplay.value = fileCount + " files selected";
+} else {
+fileNameDisplay.value = "";
+fileNameDisplay.placeholder = "No files chosen";
+}
+}
+</script>
+</body>
+</html>
